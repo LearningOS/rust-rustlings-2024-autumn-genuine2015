@@ -14,31 +14,64 @@
 // Execute `rustlings hint hashmaps3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
 use std::collections::HashMap;
+use std::ops::{Add, AddAssign};
 
 // A structure to store the goal details of a team.
+#[derive(Clone)]
 struct Team {
     goals_scored: u8,
     goals_conceded: u8,
 }
 
+impl AddAssign for Team {
+    fn add_assign(&mut self, rhs: Self) {
+        self.goals_scored   += rhs.goals_scored;
+        self.goals_conceded += rhs.goals_conceded;
+    }
+}
+
 fn build_scores_table(results: String) -> HashMap<String, Team> {
     // The name of the team is the key and its associated struct is the value.
-    let mut scores: HashMap<String, Team> = HashMap::new();
+    let mut scores: HashMap</* name: */String, /* score: */Team> = HashMap::new();
 
     for r in results.lines() {
+        // Extract the current line into details that are paired names and paired scores.
         let v: Vec<&str> = r.split(',').collect();
         let team_1_name = v[0].to_string();
-        let team_1_score: u8 = v[2].parse().unwrap();
         let team_2_name = v[1].to_string();
+        let team_1_score: u8 = v[2].parse().unwrap();
         let team_2_score: u8 = v[3].parse().unwrap();
-        // TODO: Populate the scores table with details extracted from the
-        // current line. Keep in mind that goals scored by team_1
-        // will be the number of goals conceded from team_2, and similarly
-        // goals scored by team_2 will be the number of goals conceded by
-        // team_1.
+
+        // The change of the paired teams.
+        // Keep in mind that
+        // goals scored by team_1 will be the number of goals conceded from team_2,
+        // and similarly
+        // goals scored by team_2 will be the number of goals conceded by team_1.
+        let team_1_diff = Team {
+            goals_scored:   team_1_score,
+            goals_conceded: team_2_score,
+        };
+        let team_2_diff = Team {
+            goals_scored:   team_2_score,
+            goals_conceded: team_1_score,
+        };
+
+        // Populate the scores table with details extracted from the
+        // current line.
+        scores
+            .entry(team_1_name)
+            .and_modify(|team: &mut Team|
+                *team += team_1_diff.clone()
+            )
+            .or_insert(team_1_diff);
+
+        scores
+            .entry(team_2_name)
+            .and_modify(|team: &mut Team|
+                *team += team_2_diff.clone()
+            )
+            .or_insert(team_2_diff);
     }
     scores
 }

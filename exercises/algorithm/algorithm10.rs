@@ -2,7 +2,7 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
+
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -28,20 +28,31 @@ impl Graph for UndirectedGraph {
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>> {
         &self.adjacency_table
     }
-    fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
-    }
+    // fn add_edge(&mut self, edge: (&str, &str, i32)) {
+    //     //TODO
+    // }
 }
 pub trait Graph {
     fn new() -> Self;
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
+    /// Add the node and return if the node is independent
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
+        self
+            .adjacency_table_mutable()
+            .entry(node.to_string())
+            .or_insert(vec![])
+            .is_empty()
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        self.add_node(edge.0);
+        self.add_node(edge.1);
+        self.adjacency_table_mutable()
+            .entry(edge.0.to_string())
+            .and_modify(|v| v.push((edge.1.to_string(), edge.2)));
+        self.adjacency_table_mutable()
+            .entry(edge.1.to_string())
+            .and_modify(|v| v.push((edge.0.to_string(), edge.2)));
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
@@ -66,9 +77,6 @@ mod test_undirected_graph {
     #[test]
     fn test_add_edge() {
         let mut graph = UndirectedGraph::new();
-        graph.add_edge(("a", "b", 5));
-        graph.add_edge(("b", "c", 10));
-        graph.add_edge(("c", "a", 7));
         let expected_edges = [
             (&String::from("a"), &String::from("b"), 5),
             (&String::from("b"), &String::from("a"), 5),
@@ -77,6 +85,11 @@ mod test_undirected_graph {
             (&String::from("b"), &String::from("c"), 10),
             (&String::from("c"), &String::from("b"), 10),
         ];
+
+        graph.add_edge(("a", "b", 5));
+        graph.add_edge(("b", "c", 10));
+        graph.add_edge(("c", "a", 7));
+
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }

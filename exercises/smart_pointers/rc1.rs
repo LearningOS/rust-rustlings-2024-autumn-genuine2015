@@ -10,12 +10,12 @@
 //
 // Execute `rustlings hint rc1` or use the `hint` watch subcommand for a hint.
 
-// I AM NOT DONE
-
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-struct Sun {}
+struct Sun {
+    age: u32,
+}
 
 #[derive(Debug)]
 enum Planet {
@@ -27,6 +27,7 @@ enum Planet {
     Saturn(Rc<Sun>),
     Uranus(Rc<Sun>),
     Neptune(Rc<Sun>),
+    Pluto(Weak<Sun>),
 }
 
 impl Planet {
@@ -36,7 +37,7 @@ impl Planet {
 }
 
 fn main() {
-    let sun = Rc::new(Sun {});
+    let sun = Rc::new(Sun { age: u32::MAX });
     println!("reference count = {}", Rc::strong_count(&sun)); // 1 reference
 
     let mercury = Planet::Mercury(Rc::clone(&sun));
@@ -59,22 +60,33 @@ fn main() {
     println!("reference count = {}", Rc::strong_count(&sun)); // 6 references
     jupiter.details();
 
-    // TODO
-    let saturn = Planet::Saturn(Rc::new(Sun {}));
+    let saturn = Planet::Saturn(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 7 references
     saturn.details();
 
-    // TODO
-    let uranus = Planet::Uranus(Rc::new(Sun {}));
+    let uranus = Planet::Uranus(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 8 references
     uranus.details();
 
-    // TODO
-    let neptune = Planet::Neptune(Rc::new(Sun {}));
+    let neptune = Planet::Neptune(Rc::clone(&sun));
     println!("reference count = {}", Rc::strong_count(&sun)); // 9 references
     neptune.details();
 
+    let pluto = Planet::Pluto(Rc::downgrade(&sun));  // since pluto is now considered as a minor planet.
+    println!("reference count = {}", Rc::strong_count(&sun)); // 9 references
+    println!("weak count = {}", Rc::weak_count(&sun)); // 1 references
+    pluto.details();
+
+    // println!("{:?}", Rc::into_inner(sun));
+
+    if let Planet::Pluto(ref weak) = pluto {
+        let pluto_major = weak.upgrade();
+        assert!(pluto_major.is_some());
+        assert_eq!(Rc::strong_count(&sun), 10); // Now pluto is considered as a major planet.
+    } // drop(pluto_major);
+
     assert_eq!(Rc::strong_count(&sun), 9);
+    assert_eq!(Rc::weak_count(&sun), 1);
 
     drop(neptune);
     println!("reference count = {}", Rc::strong_count(&sun)); // 8 references
@@ -91,14 +103,29 @@ fn main() {
     drop(mars);
     println!("reference count = {}", Rc::strong_count(&sun)); // 4 references
 
-    // TODO
+    drop(earth);
     println!("reference count = {}", Rc::strong_count(&sun)); // 3 references
 
-    // TODO
+    drop(venus);
     println!("reference count = {}", Rc::strong_count(&sun)); // 2 references
 
-    // TODO
+    drop(mercury);
     println!("reference count = {}", Rc::strong_count(&sun)); // 1 reference
 
+    if let Planet::Pluto(ref weak) = pluto {
+        let pluto_major = weak.upgrade();
+        assert!(pluto_major.is_some());
+        assert_eq!(Rc::strong_count(&sun), 2); // Now pluto is considered as a major planet.
+    } // drop(pluto_major);
+
     assert_eq!(Rc::strong_count(&sun), 1);
+
+    drop(sun);
+
+    if let Planet::Pluto(ref weak) = pluto {
+        let pluto_major = weak.upgrade();
+        assert!(pluto_major.is_none());
+    } // drop(pluto_major);
+
+
 }

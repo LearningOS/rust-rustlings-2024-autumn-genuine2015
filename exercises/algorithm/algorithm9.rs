@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -11,7 +10,7 @@ pub struct Heap<T>
 where
     T: Default,
 {
-    count: usize,
+    // count: usize, // Useless in Rust.  
     items: Vec<T>,
     comparator: fn(&T, &T) -> bool,
 }
@@ -22,14 +21,15 @@ where
 {
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
-            count: 0,
+            // count: 0,
             items: vec![T::default()],
             comparator,
         }
     }
 
     pub fn len(&self) -> usize {
-        self.count
+        // self.count
+        self.items.len() - 1
     }
 
     pub fn is_empty(&self) -> bool {
@@ -37,7 +37,58 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+
+        // Add the value into the end of the vec.
+        self.items.push(value);
+        // self.count += 1; // This member object has been removed.
+
+        let len = self.len();
+
+        // Use a FnMut Closure to make a series of mutation atomic.
+        let mut trinity_repair = |son| -> usize {
+            let parent = self.parent_idx(son);
+
+            if parent == 0 {
+                return 0;
+            }
+
+            if ((self.comparator)(
+                self.items.get(son).unwrap(),
+                self.items.get(parent).unwrap(),
+            )) {
+                self.items.swap(son, parent);
+            };
+
+            return parent;
+        };
+
+        let mut bubble = len;
+
+        while bubble != 0 {
+            bubble = trinity_repair(bubble);
+        }
+        // let mut active;
+
+
+
+        // // Repair the heap to keep it legal.
+        // while active_parent != 0 {
+        //     let parent = active_parent;
+        //     let smallest = self.smallest_child_idx(active_parent);
+
+        //     if smallest == 0 { unreachable!() }
+
+        //     if (self.comparator)( 
+        //         &self.items[parent],
+        //         &self.items[smallest]
+        //     ) {
+        //         ()
+        //     } else {
+        //         self.items.swap(parent, smallest)
+        //     }
+
+        //     active_parent = self.parent_idx(active_parent)
+        // }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -45,7 +96,11 @@ where
     }
 
     fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
+        self.left_child_idx(idx) <= self.len()
+    }
+
+    fn both_children_present(&self, idx: usize) -> bool {
+        self.right_child_idx(idx) <= self.len()
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
@@ -56,9 +111,28 @@ where
         self.left_child_idx(idx) + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+    fn smallest_child_idx(&self, idx: usize) -> usize {  
+        // left index out of bound.      
+        if idx * 2  > self.len() {  
+            return usize::MAX;
+        }
+
+        // only left index is available. 
+        if idx * 2 == self.len() { 
+            return idx * 2;
+        }
+        
+        let left  = self.items.get(idx * 2).unwrap();
+        let right = self.items.get(idx * 2 + 1).unwrap();
+        let smallest;
+
+        if (self.comparator)(left, right) { // left < right 
+            smallest = idx * 2 
+        } else { // left > right 
+            smallest = idx * 2 + 1
+        };
+
+        smallest
     }
 }
 
@@ -84,8 +158,32 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut i;
+        let last = self.len();
+
+        i = 1usize;
+
+        while i * 2 < last {
+            let child  = self.smallest_child_idx(i);
+            let ref_child = self.items.get(child).unwrap(); 
+            let ref_last  = self.items.get(last ).unwrap();
+
+            if (self.comparator)(ref_child, ref_last) { // ref_child < ref_last
+                self.items.swap(i, child);
+                i = child;
+                continue;
+            } else { // ref_child > ref_last
+                break;
+            }
+        }
+
+        self.items.swap(i, last);
+
+        self.items.pop()
     }
 }
 

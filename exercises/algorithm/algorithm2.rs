@@ -2,7 +2,6 @@
 	double linked list reverse
 	This problem requires you to reverse a doubly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -72,8 +71,60 @@ impl<T> LinkedList<T> {
             },
         }
     }
+
+    /// To take away the first node, and return its value.
+    /// 
+    /// # Example: 
+    /// 
+    /// ```
+    /// fn test_deque() {
+    ///     let mut list = LinkedList::<i32>::new();
+    ///     list.add(1);
+    ///     list.add(2);
+    ///     list.add(3);
+    ///     println!("Linked List is {}", list);
+    ///     assert_eq!(3, list.length);
+    ///
+    ///     assert_eq!(list.deque(), Some(1));
+    ///     assert_eq!(2, list.length);
+    ///
+    ///     assert_eq!(list.deque(), Some(2));
+    ///     assert_eq!(1, list.length);
+    ///
+    ///     assert_eq!(list.deque(), Some(3));
+    ///     assert_eq!(0, list.length);
+    ///
+    ///     assert_eq!(list.deque(), None);
+    ///     assert_eq!(0, list.length);
+    /// }
+    /// ```
+    pub fn deque(&mut self) -> Option<T> {
+        let start_ptr = self.start?; // if self.start == None, return it.
+
+        let val = unsafe {
+            let start_box = Box::from_raw(start_ptr.as_ptr());
+
+            self.start = start_box.next;
+            self.length -= 1;
+            if self.length == 0 {
+                *self = Self::new();
+            }
+            start_box.val
+        };
+
+        Some(val)
+    }
+
 	pub fn reverse(&mut self){
-		// TODO
+        let mut vec = Vec::<T>::new();
+
+        while let Some(obj) = self.deque() {
+            vec.push(obj);
+        }
+
+        while let Some(obj) = vec.pop() {
+            self.add(obj)
+        }
 	}
 }
 
@@ -123,6 +174,24 @@ mod tests {
         list_str.add("C".to_string());
         println!("Linked List is {}", list_str);
         assert_eq!(3, list_str.length);
+    }
+
+    #[test]
+    fn test_deque() {
+        let mut list = LinkedList::<i32>::new();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        println!("Linked List is {}", list);
+        assert_eq!(3, list.length);
+        assert_eq!(list.deque(), Some(1));
+        assert_eq!(2, list.length);
+        assert_eq!(list.deque(), Some(2));
+        assert_eq!(1, list.length);
+        assert_eq!(list.deque(), Some(3));
+        assert_eq!(0, list.length);
+        assert_eq!(list.deque(), None);
+        assert_eq!(0, list.length);
     }
 
     #[test]

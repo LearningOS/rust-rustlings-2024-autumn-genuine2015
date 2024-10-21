@@ -2,8 +2,6 @@
 	binary_search tree
 	This problem requires you to implement a basic interface for a binary tree
 */
-
-//I AM NOT DONE
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -50,13 +48,24 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
-        //TODO
+        match &mut self.root {
+            None => {
+                self.root = Some(Box::new(TreeNode::new(value)));
+            },
+            Some(root) => {
+                root.insert(value);
+            },
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
         //TODO
-        true
+        if let Some(root) = &self.root {
+            root.search(&value)
+        } else {
+            false
+        }
     }
 }
 
@@ -66,7 +75,43 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        match value.cmp(&self.value) {
+            Ordering::Less => if let Some(left) = &mut self.left {
+                left.insert(value);
+            } else {
+                self.left = Some(Box::new(TreeNode::new(value)));
+            },
+            Ordering::Equal => (),
+            Ordering::Greater => if let Some(right) = &mut self.right {
+                right.insert(value);
+            } else {
+                self.right = Some(Box::new(TreeNode::new(value)));
+            },
+        }
+        
+    }
+
+    // Search for a value in the node and its subnodes
+    fn search(&self, value: &T) -> bool {
+        if *value == self.value {
+            return true;
+        };
+
+        // match (&mut self.left, &mut self.right) {
+        //     (None, None) => false,
+        //     (Some(left), None) => left.search(value),
+        //     (None, Some(right)) => right.search(value),
+        //     (Some(left), Some(right)) => left.search(value) | right.search(value);
+        // }
+        let lfound = self.left.as_ref()
+            .map(|n| n.as_ref().search(value))
+            .unwrap_or(false);
+
+        let rfound = self.right.as_ref()
+            .map(|n| n.as_ref().search(value))
+            .unwrap_or(false);
+
+        lfound || rfound
     }
 }
 

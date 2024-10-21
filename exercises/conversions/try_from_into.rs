@@ -11,6 +11,53 @@
 
 use std::convert::{TryFrom, TryInto};
 
+// I want this func to be an implementation for bool: 
+
+/// Return a result enum. If the result is true, then return Ok(());
+/// If the result is false, then return the error that you give.
+/// 
+/// # Examples:
+/// 
+/// ```
+/// assert_eq!(
+///     assert(true , "The error"),
+///     Ok(())
+/// );
+/// 
+/// assert_eq!(
+///     assert(false , "The error"),
+///     Err("The error")
+/// );
+/// ```
+/// 
+/// # Expected examples:
+/// 
+/// ```
+/// assert_eq!(
+///     true.assert("The error"),
+///     Ok(())
+/// );
+/// 
+/// assert_eq!(
+///     false.assert("The error"),
+///     Err("The error")
+/// );
+/// 
+/// assert_eq!(
+///     true.assert("The error").map(|()| 1),
+///     Ok(1)
+/// )
+/// ```
+fn assert<E>(b: bool, e: E) -> Result<(), E> {
+    if b {
+        Ok(())
+    }
+    else {
+        Err(e)
+    }
+}
+
+
 #[derive(Debug, PartialEq)]
 struct Color {
     red: u8,
@@ -27,8 +74,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
 // integers, an array of three integers, and a slice of integers.
@@ -41,6 +86,17 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        use IntoColorError::IntConversion;
+
+        let red   = tuple.0.try_into().map_err(|_| IntConversion)?;
+        let green = tuple.1.try_into().map_err(|_| IntConversion)?;
+        let blue  = tuple.2.try_into().map_err(|_| IntConversion)?;
+
+        Ok(Color {
+            red,
+            green,
+            blue,
+        })
     }
 }
 
@@ -48,6 +104,17 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        use IntoColorError::IntConversion;
+
+        let red   = arr[0].try_into().map_err(|_| IntConversion)?;
+        let green = arr[1].try_into().map_err(|_| IntConversion)?;
+        let blue  = arr[2].try_into().map_err(|_| IntConversion)?;
+
+        Ok(Color {
+            red,
+            green,
+            blue,
+        })
     }
 }
 
@@ -55,6 +122,27 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        use IntoColorError::BadLen;
+        use IntoColorError::IntConversion;
+
+        // assert(
+        //     slice.len() == 3,
+        //     BadLen,
+        // )?;
+
+        if slice.len() != 3 {
+            return Err(BadLen);
+        }
+
+        let red   = slice[0].try_into().map_err(|_| IntConversion)?;
+        let green = slice[1].try_into().map_err(|_| IntConversion)?;
+        let blue  = slice[2].try_into().map_err(|_| IntConversion)?;
+
+        Ok(Color {
+            red,
+            green,
+            blue,
+        })
     }
 }
 
