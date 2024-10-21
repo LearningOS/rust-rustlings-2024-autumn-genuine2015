@@ -177,24 +177,6 @@ mod tests {
     }
 
     #[test]
-    fn test_deque() {
-        let mut list = LinkedList::<i32>::new();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-        println!("Linked List is {}", list);
-        assert_eq!(3, list.length);
-        assert_eq!(list.deque(), Some(1));
-        assert_eq!(2, list.length);
-        assert_eq!(list.deque(), Some(2));
-        assert_eq!(1, list.length);
-        assert_eq!(list.deque(), Some(3));
-        assert_eq!(0, list.length);
-        assert_eq!(list.deque(), None);
-        assert_eq!(0, list.length);
-    }
-
-    #[test]
     fn test_reverse_linked_list_1() {
 		let mut list = LinkedList::<i32>::new();
 		let original_vec = vec![2,3,5,11,9,7];

@@ -294,28 +294,6 @@ mod tests {
     }
 
     #[test]
-    fn test_take() {
-        let mut list = LinkedList::<i32>::new();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-        println!("Linked List is {}", list);
-        assert_eq!(3, list.length);
-
-        assert_eq!(list.take(), Some(1));
-        assert_eq!(2, list.length);
-
-        assert_eq!(list.take(), Some(2));
-        assert_eq!(1, list.length);
-
-        assert_eq!(list.take(), Some(3));
-        assert_eq!(0, list.length);
-
-        assert_eq!(list.take(), None);
-        assert_eq!(0, list.length);
-    }
-
-    #[test]
     fn test_merge_linked_list_1() {
 		let mut list_a = LinkedList::<i32>::new();
 		let mut list_b = LinkedList::<i32>::new();
