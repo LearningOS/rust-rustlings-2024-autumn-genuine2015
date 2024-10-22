@@ -3,7 +3,6 @@
 	This problem requires you to implement a basic graph functio
 */
 
-
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 #[derive(Debug, Clone)]
@@ -77,6 +76,9 @@ mod test_undirected_graph {
     #[test]
     fn test_add_edge() {
         let mut graph = UndirectedGraph::new();
+        graph.add_edge(("a", "b", 5));
+        graph.add_edge(("b", "c", 10));
+        graph.add_edge(("c", "a", 7));
         let expected_edges = [
             (&String::from("a"), &String::from("b"), 5),
             (&String::from("b"), &String::from("a"), 5),
@@ -85,11 +87,6 @@ mod test_undirected_graph {
             (&String::from("b"), &String::from("c"), 10),
             (&String::from("c"), &String::from("b"), 10),
         ];
-
-        graph.add_edge(("a", "b", 5));
-        graph.add_edge(("b", "c", 10));
-        graph.add_edge(("c", "a", 7));
-
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }
